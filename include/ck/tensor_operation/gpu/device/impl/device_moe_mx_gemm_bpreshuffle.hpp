@@ -391,6 +391,42 @@ struct DeviceMoeGemmMXBPreShuffle : public DeviceMoEGemmMXBPreShuffle<ALayout,
                     printed = true;
                 }
             }
+            if(trace_set_env != nullptr && trace_set_env[0] == '1')
+            {
+                static int printed_selected = 0;
+                if(printed_selected < 64)
+                {
+                    std::cerr << "[CK MoE selected] "
+                              << "IsInputGemm=" << (IsInputGemm ? "true" : "false")
+                              << " TopK=" << arg.TopK << " NumTokens=" << arg.NumTokens
+                              << " M=" << arg.M << " MPadded=" << arg.MPadded
+                              << " N=" << arg.N << " NPadded=" << arg.NPadded
+                              << " K=" << arg.K << " KPadded=" << arg.KPadded
+                              << " StrideA=" << arg.StrideA
+                              << " StrideScaleA=" << arg.StrideScaleA
+                              << " StrideB=" << arg.StrideB
+                              << " StrideScaleB=" << arg.StrideScaleB
+                              << " StrideC=" << arg.StrideC
+                              << " KBatch=" << arg.KBatch
+                              << " KRead=" << arg.KRead << " AK0=" << arg.AK0
+                              << " BK0=" << arg.BK0 << " MBlock=" << arg.MBlock
+                              << " NBlock=" << arg.NBlock
+                              << " MPerBlock=" << MPerBlock
+                              << " NPerBlock=" << NPerBlock
+                              << " KPerBlock=" << KPerBlock
+                              << " has_main_k_block_loop="
+                              << (has_main_k_block_loop ? "true" : "false")
+                              << " K_split=" << K_split << " MemoryDataOp="
+                              << (IsInputGemm ? "Set"
+                                              : (force_stage2_set ? "Set" : "AtomicAdd"));
+                    if constexpr(NumDTensor > 0)
+                    {
+                        std::cerr << " StrideDs0=" << arg.StrideDs[0];
+                    }
+                    std::cerr << std::endl;
+                    printed_selected++;
+                }
+            }
 
             if constexpr(IsInputGemm)
             {
