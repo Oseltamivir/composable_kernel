@@ -375,6 +375,22 @@ struct DeviceMoeGemmMXBPreShuffle : public DeviceMoEGemmMXBPreShuffle<ALayout,
             const bool force_stage2_set =
                 !IsInputGemm && arg.TopK == 1 && force_stage2_set_env != nullptr &&
                 force_stage2_set_env[0] == '1';
+            const char* trace_set_env = std::getenv("AITER_DSV4_MOE_TRACE_SET");
+            if(!IsInputGemm && arg.TopK == 1 && trace_set_env != nullptr &&
+               trace_set_env[0] == '1')
+            {
+                static bool printed = false;
+                if(!printed)
+                {
+                    std::cerr << "[CK MoE stage2] "
+                              << "TopK=" << arg.TopK
+                              << " force_stage2_set="
+                              << (force_stage2_set ? "true" : "false")
+                              << " MemoryDataOp="
+                              << (force_stage2_set ? "Set" : "AtomicAdd") << std::endl;
+                    printed = true;
+                }
+            }
 
             if constexpr(IsInputGemm)
             {
